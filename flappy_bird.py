@@ -1,4 +1,5 @@
 import pygame, neat, os, time, random, pickle
+
 pygame.font.init()
 win_width, win_height = 500, 800
 GEN = 0
@@ -10,6 +11,7 @@ PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
 STAT_FONT = pygame.font.SysFont("comicsans", 50)
+
 
 class Bird:
     IMGS = BIRD_IMG
@@ -127,7 +129,7 @@ class Base:
     IMG = BASE_IMG
 
     def __init__(self, y):
-        self.y  = y
+        self.y = y
         self.x1 = 0
         self.x2 = self.WIDTH
 
@@ -146,14 +148,13 @@ class Base:
         win.blit(self.IMG, (self.x2, self.y))
 
 
-
 def draw_window(win, birds, pipes, base, score, gen):
     win.blit(BG_IMG, (0, 0))
 
     ct = time.time()
     for pipe in pipes:
         pipe.draw(win)
-    text = STAT_FONT.render("Score:" + str(score), 1, (255,255,255))
+    text = STAT_FONT.render("Score:" + str(score), 1, (255, 255, 255))
     win.blit(text, (win_width - 10 - text.get_width(), 10))
 
     generation = STAT_FONT.render("Gen:" + str(gen), 1, (255, 255, 255))
@@ -181,12 +182,11 @@ def main(genomes, config):
         gene.fitness = 0
         ge.append(gene)
 
-
     base = Base(730)
     pipes = [Pipe(600)]
     win = pygame.display.set_mode((win_width, win_height))
     clock = pygame.time.Clock()
-    score =0
+    score = 0
 
     run = True
     while run:
@@ -208,13 +208,14 @@ def main(genomes, config):
             bird.move()
             ge[x].fitness += 0.1
 
-            output = nets[x].activate((bird.y, abs(bird.y - pipes[pipe_idx].height), abs(bird.y - pipes[pipe_idx].bottom)))
+            output = nets[x].activate(
+                (bird.y, abs(bird.y - pipes[pipe_idx].height), abs(bird.y - pipes[pipe_idx].bottom)))
 
             if output[0] > 0.5:
                 bird.jump()
-        if score > 3:
-            pygame.quit()
-            quit()
+        # if score > 3:
+        #     pygame.quit()
+        #     quit()
 
         add_pipe = False
         rem = []
@@ -226,7 +227,7 @@ def main(genomes, config):
                     nets.pop(x)
                     ge.pop(x)
                 if not pipe.passed and pipe.x < bird.x:
-                    pipe.passed =True
+                    pipe.passed = True
                     add_pipe = True
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                 rem.append(pipe)
@@ -235,7 +236,7 @@ def main(genomes, config):
             score += 1
             for gene in ge:
                 gene.fitness += 5
-            pipes.append(Pipe(600))
+            pipes.append(Pipe(500))
 
         for r in rem:
             pipes.remove(r)
@@ -250,9 +251,9 @@ def main(genomes, config):
         draw_window(win, birds, pipes, base, score, GEN)
 
 
-
 def run(config_path):
-    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
+                                neat.DefaultStagnation, config_path)
     population = neat.Population(config)
 
     population.add_reporter(neat.StdOutReporter(True))
@@ -266,5 +267,3 @@ if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "neat_config.txt")
     run(config_path)
-
-
